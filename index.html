@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#f4dfe6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="VC Beauty">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>VC Beauty</title>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <style>
+    :root{
+      --bg:#fcf7f8; --bg-2:#f9eff2; --card:#ffffff; --line:#ead9df;
+      --ink:#2f2428; --muted:#8f7b81; --accent:#c98c9c; --accent-2:#e2b7c4;
+      --soft:#f6e6eb; --soft-2:#f9eef2; --lilac:#eee7f7; --peach:#f4ece7;
+      --green:#dfeedd; --green-text:#50754f; --purple:#e7ddf6; --purple-text:#7b60a8;
+      --shadow:0 12px 28px rgba(174,112,134,.08); --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+    body{padding-bottom:calc(94px + env(safe-area-inset-bottom));overscroll-behavior:none} body.intro-open{padding-bottom:0;overflow:hidden;height:100dvh} input,select,textarea,button{touch-action:manipulation}
+    button,input,select,textarea{font:inherit}
+    .app{max-width:940px;margin:0 auto}
+    .screen{padding:16px 16px 26px}
+    .hero{background:linear-gradient(180deg,#f8ecef,#f7eff2);border-bottom:1px solid var(--line);padding:12px 16px 18px}
+    .hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+    .hero-inner{display:grid;grid-template-columns:1.1fr 1.2fr;gap:14px;align-items:center}
+    .logo-box{min-height:108px;border-radius:28px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:14px 8px}
+    .brand-logo{width:100%;max-width:220px;height:auto;display:block;object-fit:contain}
+    .logo-vc{font-family:Georgia,"Times New Roman",serif;font-size:56px;line-height:.9;letter-spacing:-2px}
+    .logo-beauty{font-family:"Brush Script MT","Segoe Script",cursive;font-size:34px;line-height:1;margin-top:-6px}
+    .logo-sub{font-size:11px;letter-spacing:2px;margin-top:10px;color:var(--muted);text-transform:uppercase}
+    .hero-copy h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-weight:600;font-size:28px;line-height:1.15}
+    .hero-copy p{margin:8px 0 0;color:#5b4c52;line-height:1.35;font-size:14px}
+    .heart{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);font-size:18px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .section-head{display:flex;justify-content:space-between;align-items:center;margin:20px 2px 12px}
+    .section-head h2{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:21px;font-weight:600}
+    .linkish{color:var(--accent);font-weight:700;font-size:14px}
+    .list{display:grid;gap:12px}
+    .appt{display:grid;grid-template-columns:70px 1fr auto;gap:14px;padding:0;overflow:hidden;align-items:stretch;cursor:pointer}
+    .leftbar{width:5px;border-radius:0 8px 8px 0}
+    .appt-main{display:grid;grid-template-columns:70px 52px 1fr;gap:10px;align-items:center;padding:16px 8px 16px 0}
+    .appt-time{font-family:Georgia,"Times New Roman",serif;font-size:14px;line-height:1.35;text-align:left;padding-left:14px}
+    .avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#7a5e68;background:#f3e7eb;margin-left:4px}
+    .avatar.personal{background:#efe8e2;color:#8e7e76}
+    .appt-text{min-width:0}.appt-text .name{font-size:15px;font-weight:800;overflow-wrap:anywhere}
+    .appt-text .desc{font-size:14px;color:#56494f;margin-top:2px;overflow-wrap:anywhere}
+    .appt-text .price{font-size:15px;font-weight:700;margin-top:4px}
+    .status-col{display:flex;align-items:center;padding-right:16px}
+    .status{white-space:normal;max-width:100%;text-align:center;border-radius:999px;padding:8px 12px;font-weight:700;font-size:13px;display:flex;align-items:center;gap:7px;border:1px solid transparent}
+    .status.ok{background:var(--green);color:var(--green-text)} .status.wait{background:var(--purple);color:var(--purple-text)} .status.personal{background:var(--peach);color:#8d7167}
+    .big-action{width:100%;margin-top:14px;border:0;border-radius:999px;padding:16px 18px;background:linear-gradient(180deg,#d9a0b0,#cf8fa1);color:#fff;font-weight:800;box-shadow:var(--shadow)}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+    .mini{padding:16px 10px;text-align:center;min-height:116px}
+    .mini .mi{font-size:24px;color:#b26880}.mini .mv{font-family:Georgia,"Times New Roman",serif;font-size:20px;margin-top:10px}.mini .mk{font-size:13px;color:#6c5b62;margin-top:6px}
+    .income-card{margin-top:12px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center}
+    .income-card .label{font-size:14px;color:#6f6166}.income-card .value{font-family:Georgia,"Times New Roman",serif;font-size:34px;margin-top:4px}
+    .income-card .left{display:flex;gap:14px;align-items:center}.income-icon{width:48px;height:48px;border-radius:16px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:22px;color:#b05d78}
+    .calendar-box{padding:18px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px}.toolbar h2{margin:0;font-family:Georgia,"Times New Roman",serif;font-weight:600;font-size:22px}
+    .smallbtn,.secondary,.primary,.danger{border:0;border-radius:14px;padding:10px 14px;font-weight:700}
+    .smallbtn{background:#fff;border:1px solid var(--line)} .secondary{background:var(--soft);color:#634954} .primary{background:linear-gradient(180deg,#d9a0b0,#cf8fa1);color:#fff} .danger{background:#f8dde5;color:#ab5271}
+    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}.calhead{text-align:center;font-size:11px;color:var(--muted);padding:4px 0}
+    .day{background:#fff;border:1px solid var(--line);min-height:64px;border-radius:16px;padding:7px;text-align:left;position:relative;box-shadow:var(--shadow);cursor:pointer}
+    .day.off{opacity:.32}.day.sel{outline:2px solid var(--accent)}.day.today{background:var(--soft-2)} .daynum{font-weight:700}.dots{position:absolute;left:8px;bottom:7px}.dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:3px;background:#cf7f99}.dot.personal{background:#9e8b84}
+    .subnote{font-size:12px;color:var(--muted);margin-top:10px}
+    .search{width:100%;padding:14px 16px;border-radius:16px;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow);margin:12px 0 14px}
+    .client-row,.service-row,.setting-row{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer}
+    .client-main{display:flex;align-items:center;gap:12px}.client-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(180deg,#e9d0d8,#f3e7eb);color:#704f5b;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .client-name{font-weight:800}.client-sub{font-size:12px;color:var(--muted);margin-top:4px}.tag{border-radius:999px;background:var(--soft);padding:6px 10px;font-size:12px;font-weight:700;color:#7b606c}
+    .profile{padding:18px}.profile-top{display:flex;gap:16px;align-items:center}.profile-pic{width:84px;height:84px;border-radius:50%;background:linear-gradient(180deg,#e8ccd6,#f4e9ed);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#6e5560}
+    .profile-name{font-family:Georgia,"Times New Roman",serif;font-size:27px;font-weight:600}.profile-heart{color:#b16b84;font-size:18px;margin-left:8px}.profile-lines{margin-top:14px;display:grid;gap:8px}.profile-line{display:flex;gap:10px;align-items:flex-start;color:#4f4046}
+    .pill-actions{display:flex;gap:10px;margin-top:16px}.pill-actions button{flex:1}.info-grid{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.info-item{padding:14px}.info-item .label{font-size:12px;color:var(--muted)} .info-item .val{font-weight:700;margin-top:4px}
+    .seg{display:flex;gap:8px;overflow:auto;margin:12px 0 14px}.seg button{border:0;border-radius:999px;padding:9px 14px;background:var(--soft);white-space:nowrap;font-weight:700;color:#735d66}.seg button.active{background:linear-gradient(180deg,#d59aaa,#cd8c9e);color:#fff}
+    .modal{position:fixed;inset:0;z-index:50;background:rgba(61,40,50,.28);display:none;align-items:flex-end;justify-content:center}
+    .modal.show{display:flex}.sheet{width:100%;max-width:760px;max-height:92vh;overflow:auto;background:var(--bg);border-radius:26px 26px 0 0;padding:18px 16px calc(22px + env(safe-area-inset-bottom))}
+    .sheet h2{margin:0 0 6px;font-family:Georgia,"Times New Roman",serif;font-weight:600;font-size:25px}.sheet p{margin:0 0 10px}
+    label{display:grid;gap:6px;font-size:13px;font-weight:700;margin:12px 0;color:#57464d}
+    input,select,textarea{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:var(--shadow)} textarea{min-height:92px}
+    .twocol{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:10px;margin-top:16px}.actions>*{flex:1}.notice{padding:12px 14px;border-radius:15px;background:#fff3dd;color:#8b5f1a;font-size:13px;border:1px solid #f2e0b9}
+    .empty{text-align:center;color:var(--muted);padding:28px 10px;background:#fff;border:1px dashed var(--line);border-radius:18px;box-shadow:var(--shadow)}
+    .tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);border-top:1px solid var(--line);backdrop-filter:blur(16px);padding:8px 6px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(6,1fr);gap:2px;z-index:30}
+    .tabs button{border:0;background:none;padding:8px 2px;color:#8d7c83;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:4px}.tabs button.active{color:#b05e79;font-weight:800}.ticon{font-size:22px;line-height:1}
+    .splash{position:fixed;inset:0;z-index:1000;width:100%;height:100dvh;min-height:100svh;overflow:hidden;padding:calc(12px + env(safe-area-inset-top)) 22px calc(18px + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 15% 18%, rgba(255,255,255,.42), transparent 26%),radial-gradient(circle at 78% 28%, rgba(255,255,255,.18), transparent 22%),linear-gradient(180deg,#ecd8da 0%, #edd9db 35%, #e8d1d4 100%);touch-action:manipulation}
+    .splash-panel{width:100%;max-width:390px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;text-align:center}
+    .splash-inner{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 10px 120px}
+    .splash-logo-img{width:min(58vw,230px);height:auto;display:block;object-fit:contain}
+    .splash-logo-vc{font-family:Georgia,"Times New Roman",serif;font-size:86px;line-height:.88;letter-spacing:-4px;color:#1d1417}
+    .splash-logo-b{font-family:"Brush Script MT","Segoe Script",cursive;font-size:66px;line-height:.86;margin-top:-16px;color:#1d1417}
+    .splash-sub{margin-top:18px;font-size:14px;line-height:1.45;letter-spacing:2.5px;color:#35292d;text-transform:uppercase}
+    .splash-btn-wrap{position:absolute;left:0;right:0;bottom:max(28px,calc(18px + env(safe-area-inset-bottom)));display:flex;justify-content:center}
+    .splash-btn{width:min(66vw,250px);border:1px solid rgba(255,255,255,.28);border-radius:16px;padding:14px 20px;background:linear-gradient(180deg,#ca95a3,#c48897);color:#fff;font-weight:800;box-shadow:0 8px 20px rgba(145,86,106,.16)}
+    .hidden{display:none!important}
+    @media(max-width:740px){
+      .hero{padding:10px 12px 14px}
+      .hero-inner{grid-template-columns:42% 58%;gap:8px}
+      .brand-logo{max-width:150px}
+      .hero-copy h1{font-size:24px;line-height:1.08}
+      .hero-copy p{font-size:13px;line-height:1.3}
+      .screen{padding:14px 12px 24px}
+      .toolbar{gap:8px}
+      .toolbar h2{font-size:20px}
+      .section-head{align-items:flex-start;gap:8px}
+      .section-head h2{font-size:20px;line-height:1.08}
+      .linkish{font-size:13px;white-space:nowrap;margin-top:3px}
+      .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+      .info-grid{grid-template-columns:1fr}
+      .appt{grid-template-columns:5px minmax(0,1fr);gap:0}
+      .appt-main{grid-column:2;grid-template-columns:70px 44px minmax(0,1fr);gap:8px;padding:14px 10px 8px 0;min-width:0}
+      .appt-time{font-size:13px;padding-left:10px;white-space:normal}
+      .avatar{width:40px;height:40px;font-size:16px;margin-left:0}
+      .appt-text .name{font-size:15px}
+      .appt-text .desc{font-size:13px}
+      .appt-text .price{font-size:14px}
+      .status-col{grid-column:2;padding:0 10px 12px 10px;justify-content:flex-start;min-width:0}
+      .status{font-size:11px;padding:7px 9px;white-space:normal;line-height:1.15;max-width:150px}
+      .card{max-width:100%}
+      .income-card .value{font-size:28px}
+      .tabs{grid-template-columns:repeat(6,1fr)}
+      .tabs button{font-size:10px;padding-left:0;padding-right:0}
+      .ticon{font-size:19px}
+    }
+    @media(max-width:390px){
+      .hero-copy h1{font-size:22px}
+      .hero-copy p{font-size:12px}
+      .brand-logo{max-width:130px}
+      .appt-main{grid-template-columns:62px 40px minmax(0,1fr)}
+      .appt-time{font-size:12px}
+      .section-head h2{font-size:19px}
+      .linkish{font-size:12px}
+      .mini{min-height:105px;padding:13px 8px}
+      .mini .mv{font-size:18px}
+      .mini .mk{font-size:12px}
+    }
+
+    .notif-box{padding:14px 16px;margin:10px 0}.notif-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}.notif-row:last-child{border-bottom:0}.notif-copy b{display:block}.notif-copy span{font-size:12px;color:var(--muted);display:block;margin-top:3px}.switch{position:relative;width:50px;height:29px;flex:none}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;background:#e6dce0;border-radius:999px;transition:.2s}.slider:before{content:"";position:absolute;width:23px;height:23px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 2px 5px rgba(0,0,0,.15);transition:.2s}.switch input:checked + .slider{background:#ce8fa2}.switch input:checked + .slider:before{transform:translateX(21px)}.push-state{padding:11px 13px;border-radius:14px;background:var(--soft);font-size:13px;margin:10px 0}.push-state.ok{background:#e4f1e5;color:#47704d}.push-state.warn{background:#fff1db;color:#8b641f}.notif-select{width:100%;margin-top:8px}
+
+  </style>
+</head>
+<body>
+<div class="app">
+  <main id="app"></main>
+</div>
+<nav class="tabs hidden" id="tabs">
+  <button data-tab="home" onclick="go('home')"><span class="ticon">⌂</span><span>Home</span></button>
+  <button data-tab="calendar" onclick="go('calendar')"><span class="ticon">▦</span><span>Calendario</span></button>
+  <button data-tab="clients" onclick="go('clients')"><span class="ticon">👤</span><span>Clienti</span></button>
+  <button data-tab="services" onclick="go('services')"><span class="ticon">✂</span><span>Servizi</span></button>
+  <button data-tab="money" onclick="go('money')"><span class="ticon">€</span><span>Incassi</span></button>
+  <button data-tab="settings" onclick="go('settings')"><span class="ticon">⚙</span><span>Impostazioni</span></button>
+</nav>
+<div class="modal" id="modal" onclick="if(event.target===this) closeModal()"><div class="sheet" id="sheet"></div></div>
+<script>
+const DEFAULT_SERVICES = [
+  {id:"s1",name:"Make-up cerimonia",category:"Make-up",price:35,duration:120},
+  {id:"s2",name:"Make-up evento",category:"Make-up",price:50,duration:90},
+  {id:"s3",name:"Make-up sposa",category:"Make-up",price:60,duration:120},
+  {id:"s4",name:"Prova trucco",category:"Make-up",price:10,duration:60},
+  {id:"s5",name:"Semipermanente",category:"Unghie",price:25,duration:60},
+  {id:"s6",name:"Gel",category:"Unghie",price:35,duration:90},
+  {id:"s7",name:"Ricostruzione",category:"Unghie",price:40,duration:120},
+  {id:"s8",name:"Refill",category:"Unghie",price:30,duration:60}
+];
+let db = loadDB(); migrateClientFields();
+let currentTab = "home";
+let selectedDate = isoDate(new Date());
+let calMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let incomeFilter = "today";
+let showIntro = true;
+let notificationPrefs = loadNotificationPrefs();
+let pushConfigured = false;
+let pushReady = false;
+const PUSH_USER_ID = "vc-beauty-valeria";
+
+function loadNotificationPrefs(){
+  const defaults = {work:true, personal:true, unconfirmed:true, unpaid:true, dailySummary:false, leadMinutes:60};
+  try { return {...defaults, ...JSON.parse(localStorage.getItem("vc_beauty_notification_prefs") || "{}")}; } catch(e) { return defaults; }
+}
+function saveNotificationPrefs(){
+  localStorage.setItem("vc_beauty_notification_prefs", JSON.stringify(notificationPrefs));
+}
+function setNotifPref(key, value){
+  notificationPrefs[key] = value;
+  saveNotificationPrefs();
+  syncAllPushReminders().catch(()=>{});
+}
+
+async function initOneSignalPush(){
+  try{
+    const cfgResp = await fetch('/.netlify/functions/push-config', {cache:'no-store'});
+    if(!cfgResp.ok) return;
+    const cfg = await cfgResp.json();
+    pushConfigured = !!cfg.configured;
+    if(!pushConfigured) return;
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    window.OneSignalDeferred.push(async function(OneSignal){
+      try{
+        await OneSignal.init({
+          appId: cfg.appId,
+          serviceWorkerPath: "push/onesignal/OneSignalSDKWorker.js",
+          serviceWorkerParam: { scope: "/push/onesignal/" },
+          notifyButton: { enable: false }
+        });
+        await OneSignal.login(cfg.externalId || PUSH_USER_ID);
+        pushReady = true;
+        OneSignal.Notifications.addEventListener('permissionChange', function(){
+          syncAllPushReminders().catch(()=>{});
+          if(currentTab==='settings') render();
+        });
+      }catch(e){ console.warn('OneSignal init', e); }
+    });
+  }catch(e){ console.warn('Push config', e); }
+}
+function getPushPermission(){
+  if(!('Notification' in window)) return 'unsupported';
+  return Notification.permission;
+}
+async function requestPushPermission(){
+  if(!pushConfigured){ alert('La parte push non è ancora collegata a OneSignal. Completa la configurazione indicata nel README.'); return; }
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(async function(OneSignal){
+    try{
+      await OneSignal.login(PUSH_USER_ID);
+      await OneSignal.Notifications.requestPermission();
+      await syncAllPushReminders();
+      openNotificationSettings();
+    }catch(e){ alert('Non sono riuscito ad attivare le notifiche. Controlla le impostazioni dell’iPhone.'); }
+  });
+}
+async function sendPushRequest(payload){
+  const r = await fetch('/.netlify/functions/push-schedule', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+  const data = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(data.error || 'Errore push');
+  return data;
+}
+async function cancelPush(id){
+  if(!id) return;
+  await fetch('/.netlify/functions/push-cancel', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id})}).catch(()=>{});
+}
+function loadScheduledPushIds(){ try{return JSON.parse(localStorage.getItem('vc_beauty_scheduled_push_ids')||'[]')}catch{return []} }
+function saveScheduledPushIds(ids){ localStorage.setItem('vc_beauty_scheduled_push_ids', JSON.stringify(ids)); }
+function futureIso(date){ return date instanceof Date && !isNaN(date) && date.getTime() > Date.now()+15000 ? date.toISOString() : null; }
+function reminderTimeFor(date,time,minutesBefore){ const d=parseDT(date,time); return new Date(d.getTime()-Number(minutesBefore||60)*60000); }
+async function syncAllPushReminders(){
+  if(!pushConfigured || getPushPermission()!=='granted') return;
+  const oldIds = loadScheduledPushIds();
+  await Promise.allSettled(oldIds.map(cancelPush));
+  const newIds=[];
+  const lead=Number(notificationPrefs.leadMinutes||60);
+  const siteUrl=location.origin + location.pathname;
+  async function schedule(title,message,when,key){
+    const iso=futureIso(when); if(!iso) return;
+    try{
+      const d=await sendPushRequest({title,message,sendAfter:iso,externalId:PUSH_USER_ID,url:siteUrl,idempotencyKey:key});
+      if(d && d.id) newIds.push(d.id);
+    }catch(e){ console.warn('schedule',e); }
+  }
+  for(const a of db.appointments){
+    const s=serviceObj(a.serviceId), c=clientObj(a.clientId), start=parseDT(a.date,a.time);
+    if(notificationPrefs.work) await schedule('Appuntamento in arrivo', `${c?.name||'Cliente'} · ${s?.name||'Servizio'} alle ${fmtTime(a.time)}`, reminderTimeFor(a.date,a.time,lead), `work-${a.id}-${lead}`);
+    if(notificationPrefs.unconfirmed && !a.paid) await schedule('Appuntamento da confermare', `${c?.name||'Cliente'} · ${shortDate(a.date)} alle ${fmtTime(a.time)}`, new Date(start.getTime()-24*60*60000), `confirm-${a.id}`);
+    if(notificationPrefs.unpaid && !a.paid){
+      const end=new Date(start.getTime()+Number(s?.duration||60)*60000+60*60000);
+      await schedule('Pagamento da controllare', `${c?.name||'Cliente'} · ${s?.name||'Servizio'} · ${money(a.price)}`, end, `pay-${a.id}`);
+    }
+  }
+  if(notificationPrefs.personal){
+    for(const p of db.personal){ await schedule('Impegno personale', `${p.title} alle ${fmtTime(p.time)}`, reminderTimeFor(p.date,p.time,lead), `personal-${p.id}-${lead}`); }
+  }
+  if(notificationPrefs.dailySummary){
+    const byDay={};
+    for(const a of db.appointments){ (byDay[a.date] ||= {w:0,p:0}); byDay[a.date].w++; }
+    for(const p of db.personal){ (byDay[p.date] ||= {w:0,p:0}); byDay[p.date].p++; }
+    for(const [date,counts] of Object.entries(byDay)){
+      const when=new Date(`${date}T08:00:00`);
+      await schedule('Riepilogo di oggi', `${counts.w} appuntamenti · ${counts.p} impegni personali`, when, `daily-${date}`);
+    }
+  }
+  saveScheduledPushIds(newIds);
+}
+async function sendTestPush(){
+  if(getPushPermission()!=='granted'){ await requestPushPermission(); return; }
+  try{
+    await sendPushRequest({title:'VC Beauty',message:'Le notifiche funzionano correttamente 💗',externalId:PUSH_USER_ID,url:location.origin+location.pathname,idempotencyKey:`test-${Date.now()}`});
+    alert('Notifica di prova inviata. Dovrebbe arrivare tra pochi secondi.');
+  }catch(e){ alert('Non riesco a inviare la notifica di prova: '+e.message); }
+}
+
+function loadDB(){
+  const keys = ["vc_beauty_db_v13","vc_beauty_db_v12","vc_beauty_db_v2","mua_pwa_db_v1"];
+  for(const key of keys){
+    const raw = localStorage.getItem(key);
+    if(raw){ try{ const d=JSON.parse(raw); d.clients ||= []; d.services ||= JSON.parse(JSON.stringify(DEFAULT_SERVICES)); d.appointments ||= []; d.personal ||= []; return d; }catch(e){} }
+  }
+  return {clients:[],services:JSON.parse(JSON.stringify(DEFAULT_SERVICES)),appointments:[],personal:[]};
+}
+function migrateClientFields(){ db.clients = (db.clients||[]).map(c=>({...c,address:c.address||"",city:c.city||""})); saveDB(false); }
+function saveDB(doRender=true){ localStorage.setItem("vc_beauty_db_v13", JSON.stringify(db)); if(doRender) render(); }
+function uid(){ return (crypto.randomUUID ? crypto.randomUUID() : Date.now()+"_"+Math.random()); }
+function isoDate(d){ const x=new Date(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`; }
+function fmtDate(s){ return new Intl.DateTimeFormat("it-IT",{day:"numeric",month:"long",year:"numeric"}).format(new Date(s+"T12:00:00")); }
+function shortDate(s){ return new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(s+"T12:00:00")); }
+function fmtTime(t){ return (t||"").slice(0,5); }
+function parseDT(date,time){ return new Date(`${date}T${time||"00:00"}:00`); }
+function money(v){ return new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR"}).format(Number(v||0)); }
+function clientObj(id){ return db.clients.find(x=>x.id===id); }
+function serviceObj(id){ return db.services.find(x=>x.id===id); }
+function initials(name){ const parts=(name||"").trim().split(/\s+/).slice(0,2); return parts.length ? parts.map(p=>p[0].toUpperCase()).join("") : "VC"; }
+function escapeHTML(s){ return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+function attr(s){ return escapeHTML(s).replace(/`/g,"&#96;"); }
+function paidTotal(items=db.appointments){ return items.filter(a=>a.paid).reduce((s,a)=>s+Number(a.price||0),0); }
+function unpaidTotal(items=db.appointments){ return items.filter(a=>!a.paid).reduce((s,a)=>s+Number(a.price||0),0); }
+function sameMonth(dateStr, refDate){ const d=new Date(dateStr+"T12:00:00"); return d.getMonth()===refDate.getMonth() && d.getFullYear()===refDate.getFullYear(); }
+function monthEvents(refDate){ return [...db.appointments.filter(a=>sameMonth(a.date, refDate)).map(a=>({t:"w",dt:parseDT(a.date,a.time),x:a})), ...db.personal.filter(p=>sameMonth(p.date, refDate)).map(p=>({t:"p",dt:parseDT(p.date,p.time),x:p}))].sort((a,b)=>a.dt-b.dt); }
+function allDayEvents(date){ return [...db.appointments.filter(a=>a.date===date).map(a=>({t:"w",dt:parseDT(a.date,a.time),x:a})), ...db.personal.filter(p=>p.date===date).map(p=>({t:"p",dt:parseDT(p.date,p.time),x:p}))].sort((a,b)=>a.dt-b.dt); }
+function statusInfoWork(a){ return a.paid ? {cls:"ok", txt:"✓ Confermato"} : {cls:"wait", txt:"◔ Da confermare"}; }
+function workColor(service){ return service?.category === "Unghie" ? "#c2ace5" : "#d98ca2"; }
+function personalColor(){ return "#cdbab0"; }
+function endTime(start, mins){ const [h,m]=start.split(":").map(Number); const d=new Date(2000,0,1,h,m||0); d.setMinutes(d.getMinutes()+Number(mins||0)); return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; }
+
+function startApp(){ showIntro = false; document.body.classList.remove('intro-open'); document.getElementById('tabs').classList.remove('hidden'); render(); }
+function go(tab){ currentTab = tab; render(); }
+function render(){
+  const app = document.getElementById('app');
+  if(showIntro){ document.body.classList.add('intro-open'); document.getElementById('tabs').classList.add('hidden'); app.innerHTML = introHTML(); return; } else { document.body.classList.remove('intro-open'); }
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===currentTab));
+  document.getElementById('tabs').classList.remove('hidden');
+  if(currentTab==='home') app.innerHTML = homeHTML();
+  if(currentTab==='calendar') app.innerHTML = calendarHTML();
+  if(currentTab==='clients') app.innerHTML = clientsHTML();
+  if(currentTab==='services') app.innerHTML = servicesHTML();
+  if(currentTab==='money') app.innerHTML = moneyHTML();
+  if(currentTab==='settings') app.innerHTML = settingsHTML();
+}
+function introHTML(){ return `<div class="splash"><div class="splash-panel"><div class="splash-inner"><img src="icons/logo.png" alt="VC Beauty" class="splash-logo-img"></div><div class="splash-btn-wrap"><button class="splash-btn" onclick="startApp()">Entra</button></div></div></div>`; }
+
+function homeHTML(){
+  const monthRef = new Date(selectedDate + 'T12:00:00');
+  const events = monthEvents(monthRef);
+  const workEvents = events.filter(e=>e.t==='w').map(e=>e.x);
+  const personalEvents = events.filter(e=>e.t==='p').map(e=>e.x);
+  const predicted = workEvents.reduce((s,a)=>s+Number(a.price||0),0);
+  const monthLabel = new Intl.DateTimeFormat('it-IT',{month:'long',year:'numeric'}).format(monthRef);
+  return `<div class="hero"><div class="hero-top"><div></div><div class="heart">♡</div></div><div class="hero-inner"><div class="logo-box"><img src="icons/logo.png" alt="VC Beauty" class="brand-logo"></div><div class="hero-copy"><h1>Ciao Valeria</h1><p>Organizza al meglio il tuo mese di lavoro e i tuoi impegni personali ♡</p></div></div></div>
+  <div class="screen">
+    <div class="card" style="padding:16px 18px"><div class="toolbar"><div><div style="font-size:13px;color:var(--muted)">Mese selezionato</div><div style="font-family:Georgia,'Times New Roman',serif;font-size:28px;margin-top:2px">${monthLabel}</div></div><button class="smallbtn" onclick="go('calendar')">Apri calendario</button></div></div>
+    <div class="card" style="padding:16px;margin-top:18px">
+      <div class="section-head" style="margin-top:0"><h2>Appuntamenti del mese</h2><span class="linkish" onclick="go('calendar')">Vedi tutti ›</span></div>
+      <div class="list">${events.length ? events.map(ev=>ev.t==='w' ? apptRow(ev.x) : personalApptRow(ev.x)).join('') : '<div class="empty">Nessun evento per questo mese.</div>'}</div>
+      <button class="big-action" onclick="openNewMenu('${selectedDate}')">＋ Nuovo appuntamento</button>
+    </div>
+    <div class="card" style="padding:16px;margin-top:18px">
+      <div class="section-head" style="margin-top:0"><h2>Riepilogo del mese</h2><span class="linkish" onclick="go('money')">Dettagli ›</span></div>
+      <div class="summary-grid">
+        <div class="card mini"><div class="mi">🗓</div><div class="mv">${workEvents.length}</div><div class="mk">Appuntamenti</div></div>
+        <div class="card mini"><div class="mi">⏰</div><div class="mv">${personalEvents.length}</div><div class="mk">Impegni</div></div>
+        <div class="card mini"><div class="mi">€</div><div class="mv">${predicted.toLocaleString('it-IT',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="mk">Previsto mese</div></div>
+        <div class="card mini"><div class="mi">💖</div><div class="mv">${money(workEvents.filter(a=>a.paid).reduce((s,a)=>s+Number(a.price||0),0))}</div><div class="mk">Già incassato</div></div>
+      </div>
+      <div class="card income-card"><div class="left"><div class="income-icon">📊</div><div><div class="label">Da incassare</div><div class="value">${money(workEvents.filter(a=>!a.paid).reduce((s,a)=>s+Number(a.price||0),0))}</div></div></div><div>›</div></div>
+    </div>
+  </div>`;
+}
+function apptRow(a){ const s=serviceObj(a.serviceId), c=clientObj(a.clientId), st=statusInfoWork(a), start=a.time||'09:00', mins=s?.duration||60, end=endTime(start, mins); return `<div class="card appt" onclick="openAppointment('${a.id}')"><div class="leftbar" style="background:${workColor(s)}"></div><div class="appt-main"><div class="appt-time">${shortDate(a.date)}<br>${fmtTime(start)} – ${end}</div><div class="avatar">${escapeHTML(initials(c?.name||''))}</div><div class="appt-text"><div class="name">${escapeHTML(c?.name||'Cliente')}</div><div class="desc">${escapeHTML(s?.name||'Servizio')}</div><div class="price">${money(a.price)}</div></div></div><div class="status-col"><div class="status ${st.cls}">${st.txt}</div></div></div>`; }
+function personalApptRow(p){ const start=p.time||'09:00', end=endTime(start, Number(p.duration||60)); return `<div class="card appt" onclick="openPersonal('${p.id}')"><div class="leftbar" style="background:${personalColor()}"></div><div class="appt-main"><div class="appt-time">${shortDate(p.date)}<br>${fmtTime(start)} – ${end}</div><div class="avatar personal">📅</div><div class="appt-text"><div class="name">Non disponibile</div><div class="desc">${escapeHTML(p.title)}</div><div class="price">Impegno personale</div></div></div><div class="status-col"><div class="status personal">🔒 Impegno</div></div></div>`; }
+
+function calendarHTML(){
+  const y=calMonth.getFullYear(), m=calMonth.getMonth(); const first=new Date(y,m,1), start=(first.getDay()+6)%7; const days=new Date(y,m+1,0).getDate(); let cells='';
+  for(let i=0;i<start;i++) cells += `<div class="day off"></div>`;
+  for(let d=1; d<=days; d++){ const date=isoDate(new Date(y,m,d)); const hasW=db.appointments.some(a=>a.date===date), hasP=db.personal.some(p=>p.date===date); cells += `<button class="day ${date===selectedDate?'sel':''} ${date===isoDate(new Date())?'today':''}" onclick="selectDay('${date}')"><div class="daynum">${d}</div><div class="dots">${hasW?'<span class="dot"></span>':''}${hasP?'<span class="dot personal"></span>':''}</div></button>`; }
+  const dayEvents = allDayEvents(selectedDate); const monthE = monthEvents(calMonth);
+  return `<div class="screen"><div class="card calendar-box"><div class="toolbar"><button class="smallbtn" onclick="changeMonth(-1)">‹</button><h2>${new Intl.DateTimeFormat('it-IT',{month:'long',year:'numeric'}).format(calMonth)}</h2><button class="smallbtn" onclick="changeMonth(1)">›</button></div><div class="subnote">Pallino rosa = lavoro · pallino tortora = personale</div><div class="calendar">${['L','M','M','G','V','S','D'].map(x=>`<div class="calhead">${x}</div>`).join('')}${cells}</div></div>
+  <div class="section-head"><h2>Giorno</h2><button class="primary" onclick="openNewMenu('${selectedDate}')">＋</button></div><div class="list">${dayEvents.length ? dayEvents.map(e=>e.t==='w'?apptRow(e.x):personalApptRow(e.x)).join('') : '<div class="empty">Nessun evento in questo giorno.</div>'}</div>
+  <div class="section-head"><h2>Eventi del mese</h2></div><div class="list">${monthE.length ? monthE.map(e=>e.t==='w'?apptRow(e.x):personalApptRow(e.x)).join('') : '<div class="empty">Nessun evento nel mese selezionato.</div>'}</div></div>`;
+}
+function selectDay(date){ selectedDate=date; calMonth = new Date(date + 'T12:00:00'); calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1); render(); }
+function changeMonth(delta){ calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()+delta, 1); if(!sameMonth(selectedDate, calMonth)) selectedDate = isoDate(new Date(calMonth.getFullYear(), calMonth.getMonth(), 1)); render(); }
+
+function clientsHTML(){ return `<div class="screen"><div class="toolbar"><h2 style="font-size:30px">Clienti</h2><button class="primary" onclick="openClient()">＋</button></div><input class="search" id="clientSearch" placeholder="🔍  Cerca cliente..." oninput="filterClients(this.value)"><div class="list" id="clientList">${renderClientRows(db.clients)}</div></div>`; }
+function renderClientRows(items){ if(!items.length) return '<div class="empty">Nessuna cliente registrata.</div>'; return [...items].sort((a,b)=>a.name.localeCompare(b.name)).map(c=>{ const apps=db.appointments.filter(a=>a.clientId===c.id); const last=[...apps].sort((a,b)=>parseDT(b.date,b.time)-parseDT(a.date,a.time))[0]; return `<div class="card client-row" onclick="openClient('${c.id}')"><div class="client-main"><div class="client-avatar">${escapeHTML(initials(c.name))}</div><div><div class="client-name">${escapeHTML(c.name)}</div><div class="client-sub">${c.phone ? '+39 ' + escapeHTML(c.phone) : ''}${last ? `<br>Ultimo: ${shortDate(last.date)}` : '<br>Nessun appuntamento'}</div></div></div><div>›</div></div>`; }).join(''); }
+function filterClients(q){ const t=q.trim().toLowerCase(); const filtered=db.clients.filter(c=>[c.name,c.phone,c.instagram,c.address,c.city].some(v=>(v||'').toLowerCase().includes(t))); document.getElementById('clientList').innerHTML=renderClientRows(filtered); }
+
+function servicesHTML(){ return `<div class="screen"><div class="toolbar"><h2 style="font-size:30px">Servizi e Listino</h2><button class="primary" onclick="openService()">＋</button></div><div class="seg"><button class="active" onclick="filterServices('all',this)">Tutti</button><button onclick="filterServices('Make-up',this)">Make-up</button><button onclick="filterServices('Unghie',this)">Unghie</button></div><div class="list" id="serviceList">${renderServices('all')}</div></div>`; }
+function renderServices(category='all'){ const arr=db.services.filter(s=>category==='all'?true:s.category===category); if(!arr.length) return '<div class="empty">Nessun servizio.</div>'; return arr.map(s=>`<div class="card service-row" onclick="openService('${s.id}')"><div><div class="client-name">${escapeHTML(s.name)}</div><div class="client-sub">${escapeHTML(s.category)} · ${s.duration} min</div></div><div class="tag">${money(s.price)}</div></div>`).join(''); }
+function filterServices(category, btn){ document.querySelectorAll('.seg button').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.getElementById('serviceList').innerHTML = renderServices(category); }
+
+function moneyHTML(){ const items=filteredIncome(); const paid=paidTotal(items), unpaid=unpaidTotal(items); return `<div class="screen"><h2 style="font-size:30px;margin-bottom:8px">Incassi</h2><div class="seg">${[['today','Oggi'],['week','Settimanale'],['month','Mensile'],['year','Annuale'],['all','Totale']].map(([k,l])=>`<button class="${incomeFilter===k?'active':''}" onclick="setIncome('${k}')">${l}</button>`).join('')}</div><div class="card" style="padding:16px"><div class="client-sub" style="margin-bottom:10px">Incasso previsto</div><div style="font-family:Georgia,'Times New Roman',serif;font-size:42px">${money(paid + unpaid)}</div><div class="summary-grid" style="margin-top:16px"><div class="card mini"><div class="mv">${items.length}</div><div class="mk">Appuntamenti</div></div><div class="card mini"><div class="mv">${allPersonalFiltered().length}</div><div class="mk">Impegni</div></div><div class="card mini"><div class="mv">${money(paid)}</div><div class="mk">Totale incassato</div></div><div class="card mini"><div class="mv">${money(unpaid)}</div><div class="mk">Da incassare</div></div></div></div><div class="card" style="padding:16px;margin-top:16px"><div class="section-head" style="margin-top:0"><h2 style="font-size:18px">Servizi più richiesti</h2></div>${serviceStats()}</div></div>`; }
+function setIncome(k){ incomeFilter=k; render(); }
+function filteredIncome(){ const now=new Date(); const startOfWeek=new Date(now); const wd=(now.getDay()+6)%7; startOfWeek.setDate(now.getDate()-wd); startOfWeek.setHours(0,0,0,0); return db.appointments.filter(a=>{ const d=parseDT(a.date,a.time); if(incomeFilter==='today') return isoDate(d)===isoDate(now); if(incomeFilter==='week') return d>=startOfWeek && d<new Date(startOfWeek.getTime()+7*24*3600*1000); if(incomeFilter==='month') return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth(); if(incomeFilter==='year') return d.getFullYear()===now.getFullYear(); return true; }); }
+function allPersonalFiltered(){ const now=new Date(); const startOfWeek=new Date(now); const wd=(now.getDay()+6)%7; startOfWeek.setDate(now.getDate()-wd); startOfWeek.setHours(0,0,0,0); return db.personal.filter(p=>{ const d=parseDT(p.date,p.time); if(incomeFilter==='today') return isoDate(d)===isoDate(now); if(incomeFilter==='week') return d>=startOfWeek && d<new Date(startOfWeek.getTime()+7*24*3600*1000); if(incomeFilter==='month') return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth(); if(incomeFilter==='year') return d.getFullYear()===now.getFullYear(); return true; }); }
+function serviceStats(){ const counts={}; filteredIncome().forEach(a=>{ const s=serviceObj(a.serviceId)?.name || 'Altro'; counts[s]=(counts[s]||0)+1; }); const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]); if(!entries.length) return '<div class="empty">Nessun dato disponibile.</div>'; const total=entries.reduce((s,[,n])=>s+n,0); return entries.map(([name,n])=>{ const perc=Math.round((n/total)*100); return `<div style="margin:12px 0"><div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px"><span>${escapeHTML(name)}</span><span>${perc}%</span></div><div style="height:8px;background:#f0e8eb;border-radius:999px;overflow:hidden"><div style="height:100%;width:${perc}%;background:linear-gradient(90deg,#cf8fa1,#dca6b5)"></div></div></div>`; }).join(''); }
+
+function settingsHTML(){ return `<div class="screen"><h2 style="font-size:30px;margin-bottom:14px">Impostazioni</h2><div class="card"><div class="setting-row" onclick="openNotificationSettings()"><div><div class="client-name">Notifiche</div><div class="client-sub">Scegli quali promemoria ricevere</div></div><div>›</div></div><div class="setting-row"><div><div class="client-name">Orari di lavoro</div><div class="client-sub">Personalizza i tuoi orari</div></div><div>›</div></div><div class="setting-row"><div><div class="client-name">Giorni di ferie</div><div class="client-sub">Blocca i giorni di non disponibilità</div></div><div>›</div></div><div class="setting-row" onclick="exportBackup()"><div><div class="client-name">Backup dati</div><div class="client-sub">Salva i tuoi dati in sicurezza</div></div><div>›</div></div><div class="setting-row" onclick="importBackup()"><div><div class="client-name">Ripristina backup</div><div class="client-sub">Importa un file JSON</div></div><div>›</div></div><div class="setting-row"><div><div class="client-name">Tema</div><div class="client-sub">Chiaro</div></div><div>›</div></div><div class="setting-row"><div><div class="client-name">Lingua</div><div class="client-sub">Italiano</div></div><div>›</div></div></div><button class="danger" style="width:100%;margin-top:20px;padding:16px" onclick="resetAll()">Azzera dati</button></div>`; }
+
+function openNotificationSettings(){
+  const perm=getPushPermission();
+  const state = !pushConfigured ? '<div class="push-state warn">Configurazione server push da completare.</div>' : perm==='granted' ? '<div class="push-state ok">✓ Notifiche consentite su questo iPhone</div>' : perm==='denied' ? '<div class="push-state warn">Notifiche bloccate. Vai in Impostazioni iPhone → Notifiche → VC Beauty.</div>' : '<div class="push-state">Le notifiche non sono ancora state autorizzate.</div>';
+  const sw=(key,title,sub)=>`<div class="notif-row"><div class="notif-copy"><b>${title}</b><span>${sub}</span></div><label class="switch"><input type="checkbox" ${notificationPrefs[key]?'checked':''} onchange="setNotifPref('${key}',this.checked)"><span class="slider"></span></label></div>`;
+  showSheet(`<h2>Notifiche</h2><p>Scegli quali promemoria vuoi ricevere anche quando VC Beauty è chiusa.</p>${state}
+    <div class="card notif-box">
+      ${sw('work','Appuntamenti di lavoro','Promemoria per make-up e unghie')}
+      ${sw('personal','Impegni personali','Promemoria per gli impegni personali')}
+      ${sw('unconfirmed','Da confermare','Ricorda gli appuntamenti ancora da confermare')}
+      ${sw('unpaid','Pagamenti da controllare','Promemoria dopo gli appuntamenti non segnati come completati')}
+      ${sw('dailySummary','Riepilogo giornaliero','Alle 08:00, nei giorni con eventi')}
+    </div>
+    <label>Quanto prima vuoi il promemoria?<select class="notif-select" onchange="setNotifPref('leadMinutes',Number(this.value))">
+      <option value="15" ${notificationPrefs.leadMinutes==15?'selected':''}>15 minuti prima</option>
+      <option value="30" ${notificationPrefs.leadMinutes==30?'selected':''}>30 minuti prima</option>
+      <option value="60" ${notificationPrefs.leadMinutes==60?'selected':''}>1 ora prima</option>
+      <option value="120" ${notificationPrefs.leadMinutes==120?'selected':''}>2 ore prima</option>
+      <option value="1440" ${notificationPrefs.leadMinutes==1440?'selected':''}>1 giorno prima</option>
+    </select></label>
+    <div class="actions"><button class="primary" onclick="requestPushPermission()">${perm==='granted'?'Risincronizza promemoria':'Consenti notifiche'}</button><button class="secondary" onclick="sendTestPush()">Notifica di prova</button></div>`);
+}
+
+
+function openNewMenu(date=isoDate(new Date())){ showSheet(`<h2>Nuovo appuntamento</h2><p>Scegli cosa vuoi aggiungere in VC Beauty.</p><div class="actions"><button class="primary" onclick="openAppointment(null,'${date}')">💄💅 Lavoro</button><button class="secondary" onclick="openPersonal(null,'${date}')">👤 Personale</button></div>`); }
+function openClient(id=null){ const c=id?db.clients.find(x=>x.id===id):{id:null,name:'',phone:'',instagram:'',address:'',city:'',notes:''}; const history=id?[...db.appointments.filter(a=>a.clientId===id)].sort((a,b)=>parseDT(b.date,b.time)-parseDT(a.date,a.time)):[]; const spent=paidTotal(history), due=unpaidTotal(history); showSheet(id ? `<div class="profile card"><div class="profile-top"><div class="profile-pic">${escapeHTML(initials(c.name))}</div><div><div class="profile-name">${escapeHTML(c.name)} <span class="profile-heart">♡</span></div><div class="profile-lines">${c.phone?`<div class="profile-line">📞 <span>+39 ${escapeHTML(c.phone)}</span></div>`:''}${c.instagram?`<div class="profile-line">📷 <span>${escapeHTML(c.instagram)}</span></div>`:''}${c.address?`<div class="profile-line">🏠 <span>${escapeHTML(c.address)}</span></div>`:''}${c.city?`<div class="profile-line">📍 <span>${escapeHTML(c.city)}</span></div>`:''}</div><div class="pill-actions"><button class="primary" onclick="openAppointment(null,'${isoDate(new Date())}','${c.id}')">Nuovo appuntamento</button><button class="secondary" onclick="openClientForm('${c.id}')">Modifica</button></div></div></div><div class="info-grid"><div class="card info-item"><div class="label">Appuntamenti</div><div class="val">${history.length}</div></div><div class="card info-item"><div class="label">Totale speso</div><div class="val">${money(spent)}</div></div><div class="card info-item"><div class="label">Da pagare</div><div class="val">${money(due)}</div></div><div class="card info-item"><div class="label">Note</div><div class="val">${c.notes ? escapeHTML(c.notes) : '—'}</div></div></div></div><div class="section-head"><h2>Storico appuntamenti</h2></div><div class="list">${history.length ? history.map(apptRow).join('') : '<div class="empty">Nessun appuntamento registrato.</div>'}</div>` : clientFormHTML(c)); }
+function openClientForm(id){ const c=db.clients.find(x=>x.id===id); showSheet(clientFormHTML(c)); }
+function clientFormHTML(c){ return `<h2>${c?.id?'Modifica cliente':'Nuova cliente'}</h2><form onsubmit="saveClient(event,'${c?.id||''}')"><label>Nome e cognome<input id="c_name" value="${attr(c?.name||'')}" required></label><label>Telefono<input id="c_phone" value="${attr(c?.phone||'')}" inputmode="tel"></label><label>Instagram<input id="c_instagram" value="${attr(c?.instagram||'')}"></label><label>Indirizzo<input id="c_address" value="${attr(c?.address||'')}" placeholder="Via, numero civico"></label><label>Paese / Città<input id="c_city" value="${attr(c?.city||'')}" placeholder="Es. Sant'Agata di Militello"></label><label>Note<textarea id="c_notes">${escapeHTML(c?.notes||'')}</textarea></label><div class="actions">${c?.id?`<button type="button" class="danger" onclick="deleteClient('${c.id}')">Elimina</button>`:''}<button class="primary">Salva</button></div></form>`; }
+function saveClient(e,id){ e.preventDefault(); const obj={id:id||uid(),name:c_name.value.trim(),phone:c_phone.value.trim(),instagram:c_instagram.value.trim(),address:c_address.value.trim(),city:c_city.value.trim(),notes:c_notes.value.trim()}; const i=db.clients.findIndex(x=>x.id===id); if(i>=0) db.clients[i]=obj; else db.clients.push(obj); closeModal(); saveDB(); syncAllPushReminders().catch(()=>{}); }
+function deleteClient(id){ if(!confirm('Eliminare la cliente e tutti i suoi appuntamenti?')) return; db.clients=db.clients.filter(x=>x.id!==id); db.appointments=db.appointments.filter(x=>x.clientId!==id); closeModal(); saveDB(); syncAllPushReminders().catch(()=>{}); }
+function openService(id=null){ const s=id?db.services.find(x=>x.id===id):{id:null,name:'',category:'Make-up',price:0,duration:60}; showSheet(`<h2>${id?'Modifica servizio':'Nuovo servizio'}</h2><form onsubmit="saveService(event,'${id||''}')"><label>Nome servizio<input id="s_name" value="${attr(s.name)}" required></label><label>Categoria<select id="s_cat"><option ${s.category==='Make-up'?'selected':''}>Make-up</option><option ${s.category==='Unghie'?'selected':''}>Unghie</option></select></label><div class="twocol"><label>Prezzo (€)<input id="s_price" type="number" step=".01" value="${s.price}" required></label><label>Durata (minuti)<input id="s_dur" type="number" value="${s.duration}" required></label></div><div class="actions">${id?`<button type="button" class="danger" onclick="deleteService('${id}')">Elimina</button>`:''}<button class="primary">Salva</button></div></form>`); }
+function saveService(e,id){ e.preventDefault(); const obj={id:id||uid(),name:s_name.value.trim(),category:s_cat.value,price:+s_price.value,duration:+s_dur.value}; const i=db.services.findIndex(x=>x.id===id); if(i>=0) db.services[i]=obj; else db.services.push(obj); closeModal(); saveDB(); syncAllPushReminders().catch(()=>{}); }
+function deleteService(id){ if(!confirm('Eliminare il servizio?')) return; db.services=db.services.filter(x=>x.id!==id); closeModal(); saveDB(); syncAllPushReminders().catch(()=>{}); }
+function openAppointment(id=null,date=isoDate(new Date()),preClient=null){ if(!db.clients.length){ alert('Aggiungi prima almeno una cliente.'); closeModal(); go('clients'); return; } if(!db.services.length){ alert('Aggiungi prima almeno un servizio.'); closeModal(); go('services'); return; } const a=id?db.appointments.find(x=>x.id===id):{id:null,clientId:preClient||db.clients[0].id,serviceId:db.services[0].id,date,time:'09:00',price:db.services[0].price,paid:false,notes:''}; showSheet(`<h2>${id?'Modifica appuntamento':'Nuovo appuntamento'}</h2><form onsubmit="saveAppointment(event,'${id||''}')"><label>Cliente<select id="a_client">${db.clients.map(c=>`<option value="${c.id}" ${c.id===a.clientId?'selected':''}>${escapeHTML(c.name)}</option>`).join('')}</select></label><label>Servizio<select id="a_service" onchange="syncAppointmentPrice()">${db.services.map(s=>`<option value="${s.id}" ${s.id===a.serviceId?'selected':''}>${escapeHTML(s.category+' — '+s.name)}</option>`).join('')}</select></label><div class="twocol"><label>Data<input id="a_date" type="date" value="${a.date}" required></label><label>Ora<input id="a_time" type="time" value="${a.time}" required></label></div><div class="twocol"><label>Prezzo (€)<input id="a_price" type="number" step=".01" value="${a.price}" required></label><label>Stato<select id="a_paid"><option value="0" ${!a.paid?'selected':''}>Da confermare</option><option value="1" ${a.paid?'selected':''}>Confermato</option></select></label></div><label>Note<textarea id="a_notes">${escapeHTML(a.notes||'')}</textarea></label><div id="conflictBox"></div><div class="actions">${id?`<button type="button" class="danger" onclick="deleteAppointment('${id}')">Elimina</button>`:''}<button class="primary">Salva appuntamento</button></div></form>`); }
+function syncAppointmentPrice(){ const s=serviceObj(a_service.value); if(s) a_price.value=s.price; }
+function conflictFor(date,time,duration,ignoreId=null,ignorePersonalId=null){ const start=parseDT(date,time), end=new Date(start.getTime()+Number(duration||0)*60000); const work=db.appointments.some(a=>{ if(a.id===ignoreId) return false; const s=serviceObj(a.serviceId); const st=parseDT(a.date,a.time), en=new Date(st.getTime()+Number(s?.duration||60)*60000); return start<en && end>st; }); const pers=db.personal.some(p=>{ if(p.id===ignorePersonalId) return false; const st=parseDT(p.date,p.time), en=new Date(st.getTime()+Number(p.duration||60)*60000); return start<en && end>st; }); return work || pers; }
+function saveAppointment(e,id){ e.preventDefault(); const s=serviceObj(a_service.value), dur=s?.duration||60; if(conflictFor(a_date.value,a_time.value,dur,id||null,null)){ conflictBox.innerHTML='<div class="notice">Questo orario si sovrappone a un altro impegno.</div>'; return; } const obj={id:id||uid(),clientId:a_client.value,serviceId:a_service.value,date:a_date.value,time:a_time.value,price:+a_price.value,paid:a_paid.value==='1',notes:a_notes.value.trim()}; const i=db.appointments.findIndex(x=>x.id===id); if(i>=0) db.appointments[i]=obj; else db.appointments.push(obj); closeModal(); saveDB(); syncAllPushReminders().catch(()=>{}); }
+function deleteAppointment(id){ if(!confirm('Eliminare questo appuntamento?')) return; db.appointments=db.appointments.filter(x=>x.id!==id); closeModal(); saveDB(); syncAllPushReminders().catch(()=>{}); }
+function openPersonal(id=null,date=isoDate(new Date())){ const p=id?db.personal.find(x=>x.id===id):{id:null,title:'',date,time:'15:00',duration:60,notes:''}; showSheet(`<h2>${id?'Modifica impegno':'Nuovo impegno personale'}</h2><form onsubmit="savePersonal(event,'${id||''}')"><label>Impegno<input id="p_title" value="${attr(p.title)}" required></label><div class="twocol"><label>Data<input id="p_date" type="date" value="${p.date}" required></label><label>Ora<input id="p_time" type="time" value="${p.time}" required></label></div><label>Durata (minuti)<input id="p_dur" type="number" value="${p.duration||60}" required></label><label>Note<textarea id="p_notes">${escapeHTML(p.notes||'')}</textarea></label><div id="pConflict"></div><div class="actions">${id?`<button type="button" class="danger" onclick="deletePersonal('${id}')">Elimina</button>`:''}<button class="primary">Salva</button></div></form>`); }
+function savePersonal(e,id){ e.preventDefault(); if(conflictFor(p_date.value,p_time.value,+p_dur.value,null,id||null)){ pConflict.innerHTML='<div class="notice">Questo orario si sovrappone a un altro impegno.</div>'; return; } const obj={id:id||uid(),title:p_title.value.trim(),date:p_date.value,time:p_time.value,duration:+p_dur.value,notes:p_notes.value.trim()}; const i=db.personal.findIndex(x=>x.id===id); if(i>=0) db.personal[i]=obj; else db.personal.push(obj); closeModal(); saveDB(); syncAllPushReminders().catch(()=>{}); }
+function deletePersonal(id){ if(!confirm('Eliminare questo impegno?')) return; db.personal=db.personal.filter(x=>x.id!==id); closeModal(); saveDB(); syncAllPushReminders().catch(()=>{}); }
+function exportBackup(){ const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`vc-beauty-backup-${isoDate(new Date())}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+function importBackup(){ showSheet(`<h2>Ripristina backup</h2><p>Seleziona un file JSON esportato da VC Beauty.</p><input type="file" id="backupFile" accept=".json,application/json"><div class="actions"><button class="primary" onclick="doImport()">Importa backup</button></div>`); }
+function doImport(){ const f=backupFile.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const d=JSON.parse(r.result); if(!d.clients || !d.services || !d.appointments || !d.personal) throw new Error(); d.clients=d.clients.map(c=>({...c,address:c.address||'',city:c.city||''})); db=d; closeModal(); saveDB(); alert('Backup importato.'); }catch(e){ alert('Backup non valido.'); } }; r.readAsText(f); }
+function resetAll(){ if(!confirm('Vuoi azzerare tutti i dati?')) return; db={clients:[],services:JSON.parse(JSON.stringify(DEFAULT_SERVICES)),appointments:[],personal:[]}; saveDB(); syncAllPushReminders().catch(()=>{}); }
+function showSheet(html){ document.getElementById('sheet').innerHTML=html; document.getElementById('modal').classList.add('show'); }
+function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+window.addEventListener('load',()=>initOneSignalPush());
+render();
+</script>
+</body>
+</html>
