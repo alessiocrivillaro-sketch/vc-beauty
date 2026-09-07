@@ -49,3 +49,16 @@ Nuove modifiche incluse:
 - preferenze salvate localmente
 
 Nota: per notifiche automatiche affidabili quando la PWA è chiusa serve in seguito un servizio Web Push/backend.
+
+
+## Correzione logo v2.4
+Sono stati ripristinati:
+- `manifest.webmanifest`
+- `icons/logo.png`
+- `icons/apple-touch-icon.png`
+- `icons/icon-192.png`
+- `icons/icon-512.png`
+
+Il logo utilizzato è quello inviato dall'utente per VC Beauty.
+Dopo il deploy GitHub/Netlify, per aggiornare l'icona sulla Home dell'iPhone
+può essere necessario rimuovere VC Beauty dalla Home e aggiungerla di nuovo da Safari.

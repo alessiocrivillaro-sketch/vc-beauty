@@ -34,3 +34,6 @@ Deve rispondere con JSON simile a:
 `{"configured":true,"appId":"...","externalId":"vc-beauty-valeria"}`
 
 La API key NON viene mai restituita al browser.
+
+## v2.3
+Corretto idempotency_key OneSignal: ora la Function genera sempre un UUID valido.

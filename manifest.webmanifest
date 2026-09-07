@@ -1,0 +1,21 @@
+{
+  "name": "VC Beauty",
+  "short_name": "VC Beauty",
+  "description": "Gestionale beauty per make-up, unghie e impegni personali.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fcf7f8",
+  "theme_color": "#f4dfe6",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
