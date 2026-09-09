@@ -63,10 +63,75 @@
     .calendar-box{padding:18px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px}.toolbar h2{margin:0;font-family:Georgia,"Times New Roman",serif;font-weight:600;font-size:22px}
     .smallbtn,.secondary,.primary,.danger{border:0;border-radius:14px;padding:10px 14px;font-weight:700}
     .smallbtn{background:#fff;border:1px solid var(--line)} .secondary{background:var(--soft);color:#634954} .primary{background:linear-gradient(180deg,#d9a0b0,#cf8fa1);color:#fff} .danger{background:#f8dde5;color:#ab5271}
-    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}.calhead{text-align:center;font-size:11px;color:var(--muted);padding:4px 0}
-    .day{background:#fff;border:1px solid var(--line);min-height:64px;border-radius:16px;padding:7px;text-align:left;position:relative;box-shadow:var(--shadow);cursor:pointer}
-    .day.off{opacity:.32}.day.sel{outline:2px solid var(--accent)}.day.today{background:var(--soft-2)} .daynum{font-weight:700}.dots{position:absolute;left:8px;bottom:7px}.dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:3px;background:#cf7f99}.dot.personal{background:#9e8b84}
+    .calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;margin-top:12px;border-top:1px solid #eee3e7;border-left:1px solid #eee3e7;border-radius:18px;overflow:hidden}
+    .calhead{text-align:center;font-size:11px;color:var(--muted);padding:8px 0;background:#fff;border-right:1px solid #eee3e7;border-bottom:1px solid #eee3e7}
+    .day{
+      background:#fff;border:0;border-right:1px solid #eee3e7;border-bottom:1px solid #eee3e7;
+      min-height:88px;padding:7px 4px;text-align:left;position:relative;cursor:pointer;color:var(--ink);
+      -webkit-appearance:none;appearance:none;overflow:hidden
+    }
+    .day.off{opacity:.22;background:#faf7f8}
+    .day.today .daynum{background:#f2d9e1}
+    .day.sel .daynum{background:#cf8fa1;color:#fff}
+    .daynum{
+      width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font-weight:800;color:#21191c;margin:0 auto 5px;font-size:14px
+    }
+    .day-events{display:grid;gap:3px;min-width:0}
+    .month-event{
+      display:block;width:100%;padding:3px 4px;border-radius:6px;font-size:9px;line-height:1.15;
+      font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left
+    }
+    .month-event.work{background:#f6c7d8;color:#7e3151}
+    .month-event.personal{background:#bfe5fb;color:#155d89}
+    .month-more{font-size:9px;color:var(--muted);padding-left:3px;font-weight:700}
     .subnote{font-size:12px;color:var(--muted);margin-top:10px}
+    .calendar-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}
+    .legend-item{display:flex;align-items:center;gap:6px}
+    .legend-swatch{width:14px;height:8px;border-radius:4px}
+    .legend-swatch.work{background:#f6c7d8}.legend-swatch.personal{background:#bfe5fb}
+
+    .day-agenda-card{margin-top:14px;padding:0;overflow:hidden}
+    .day-agenda-head{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;border-bottom:1px solid var(--line)}
+    .day-agenda-head h2{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:23px}
+    .timeline-wrap{position:relative;background:#fff;overflow:hidden}
+    .timeline{
+      position:relative;
+      margin-left:72px;
+      min-height:780px;
+      border-left:1px solid #eadfe3;
+    }
+    .time-row{
+      position:absolute;left:-72px;right:0;height:60px;border-top:1px solid #eee6e9;
+    }
+    .time-label{
+      position:absolute;left:0;top:-10px;width:62px;text-align:right;padding-right:10px;
+      font-size:12px;color:#91868a;background:#fff
+    }
+    .timeline-event{
+      position:absolute;left:10px;right:10px;border-radius:10px;padding:8px 10px 8px 14px;
+      overflow:hidden;box-shadow:0 2px 7px rgba(50,30,38,.06);border:1px solid rgba(0,0,0,.03);
+      z-index:2;text-align:left;-webkit-appearance:none;appearance:none
+    }
+    .timeline-event::before{
+      content:"";position:absolute;left:5px;top:7px;bottom:7px;width:4px;border-radius:999px
+    }
+    .timeline-event.work{background:#f9dbe6;color:#673246}
+    .timeline-event.work::before{background:#e58caf}
+    .timeline-event.personal{background:#d8effc;color:#1d5f87}
+    .timeline-event.personal::before{background:#38a8e8}
+    .timeline-event-title{font-weight:800;font-size:13px;line-height:1.15;margin-left:3px}
+    .timeline-event-sub{font-size:11px;margin:3px 0 0 3px;opacity:.9;line-height:1.15}
+    .timeline-empty{padding:28px 16px;text-align:center;color:var(--muted)}
+    @media(max-width:430px){
+      .calendar-box{padding:12px}
+      .day{min-height:82px;padding:6px 2px}
+      .daynum{width:26px;height:26px;font-size:13px}
+      .month-event{font-size:8px;padding:3px}
+      .month-more{font-size:8px}
+      .timeline-event-title{font-size:12px}
+      .timeline-event-sub{font-size:10px}
+    }
     .search{width:100%;padding:14px 16px;border-radius:16px;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow);margin:12px 0 14px}
     .client-row,.service-row,.setting-row{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer}
     .client-main{display:flex;align-items:center;gap:12px}.client-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(180deg,#e9d0d8,#f3e7eb);color:#704f5b;font-weight:700;display:flex;align-items:center;justify-content:center}
@@ -78,11 +143,23 @@
     .modal{position:fixed;inset:0;z-index:50;background:rgba(61,40,50,.28);display:none;align-items:flex-end;justify-content:center}
     .modal.show{display:flex}.sheet{width:100%;max-width:760px;max-height:92vh;overflow:auto;background:var(--bg);border-radius:26px 26px 0 0;padding:18px 16px calc(22px + env(safe-area-inset-bottom))}
     .sheet h2{margin:0 0 6px;font-family:Georgia,"Times New Roman",serif;font-weight:600;font-size:25px}.sheet p{margin:0 0 10px}
+    .sheet{position:relative}
+    .sheet-close{
+      position:sticky;top:0;float:right;z-index:5;
+      width:42px;height:42px;margin:-4px -2px 4px 10px;
+      border:1px solid var(--line);border-radius:50%;
+      background:rgba(255,255,255,.96);color:var(--ink);
+      display:flex;align-items:center;justify-content:center;
+      font-size:25px;font-weight:400;line-height:1;
+      box-shadow:var(--shadow);cursor:pointer;
+      -webkit-appearance:none;appearance:none;
+    }
+
     label{display:grid;gap:6px;font-size:13px;font-weight:700;margin:12px 0;color:#57464d}
     input,select,textarea{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:var(--shadow)} textarea{min-height:92px}
     .twocol{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:10px;margin-top:16px}.actions>*{flex:1}.notice{padding:12px 14px;border-radius:15px;background:#fff3dd;color:#8b5f1a;font-size:13px;border:1px solid #f2e0b9}
     .empty{text-align:center;color:var(--muted);padding:28px 10px;background:#fff;border:1px dashed var(--line);border-radius:18px;box-shadow:var(--shadow)}
-    .tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);border-top:1px solid var(--line);backdrop-filter:blur(16px);padding:8px 6px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(6,1fr);gap:2px;z-index:30}
+    .tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);border-top:1px solid var(--line);backdrop-filter:blur(16px);padding:8px 6px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(5,1fr);gap:2px;z-index:30}
     .tabs button{border:0;background:none;padding:8px 2px;color:#8d7c83;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:4px}.tabs button.active{color:#b05e79;font-weight:800}.ticon{font-size:22px;line-height:1}
     .splash{position:fixed;inset:0;z-index:1000;width:100%;height:100dvh;min-height:100svh;overflow:hidden;padding:calc(12px + env(safe-area-inset-top)) 22px calc(18px + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 15% 18%, rgba(255,255,255,.42), transparent 26%),radial-gradient(circle at 78% 28%, rgba(255,255,255,.18), transparent 22%),linear-gradient(180deg,#ecd8da 0%, #edd9db 35%, #e8d1d4 100%);touch-action:manipulation}
     .splash-panel{width:100%;max-width:390px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;text-align:center}
@@ -119,7 +196,7 @@
       .status{font-size:11px;padding:7px 9px;white-space:normal;line-height:1.15;max-width:150px}
       .card{max-width:100%}
       .income-card .value{font-size:28px}
-      .tabs{grid-template-columns:repeat(6,1fr)}
+      .tabs{grid-template-columns:repeat(5,1fr)}
       .tabs button{font-size:10px;padding-left:0;padding-right:0}
       .ticon{font-size:19px}
     }
@@ -145,10 +222,9 @@
   <main id="app"></main>
 </div>
 <nav class="tabs hidden" id="tabs">
-  <button data-tab="home" onclick="go('home')"><span class="ticon">⌂</span><span>Home</span></button>
-  <button data-tab="calendar" onclick="go('calendar')"><span class="ticon">▦</span><span>Calendario</span></button>
+  <button data-tab="calendar" onclick="go('calendar')"><span class="ticon">🗓️</span><span>Calendario</span></button>
   <button data-tab="clients" onclick="go('clients')"><span class="ticon">👤</span><span>Clienti</span></button>
-  <button data-tab="services" onclick="go('services')"><span class="ticon">✂</span><span>Servizi</span></button>
+  <button data-tab="services" onclick="go('services')"><span class="ticon">💄</span><span>Servizi</span></button>
   <button data-tab="money" onclick="go('money')"><span class="ticon">€</span><span>Incassi</span></button>
   <button data-tab="settings" onclick="go('settings')"><span class="ticon">⚙</span><span>Impostazioni</span></button>
 </nav>
@@ -165,7 +241,7 @@ const DEFAULT_SERVICES = [
   {id:"s8",name:"Refill",category:"Unghie",price:30,duration:60}
 ];
 let db = loadDB(); migrateClientFields();
-let currentTab = "home";
+let currentTab = "calendar";
 let selectedDate = isoDate(new Date());
 let calMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let incomeFilter = "today";
@@ -328,7 +404,6 @@ function render(){
   if(showIntro){ document.body.classList.add('intro-open'); document.getElementById('tabs').classList.add('hidden'); app.innerHTML = introHTML(); return; } else { document.body.classList.remove('intro-open'); }
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===currentTab));
   document.getElementById('tabs').classList.remove('hidden');
-  if(currentTab==='home') app.innerHTML = homeHTML();
   if(currentTab==='calendar') app.innerHTML = calendarHTML();
   if(currentTab==='clients') app.innerHTML = clientsHTML();
   if(currentTab==='services') app.innerHTML = servicesHTML();
@@ -368,14 +443,132 @@ function apptRow(a){ const s=serviceObj(a.serviceId), c=clientObj(a.clientId), s
 function personalApptRow(p){ const start=p.time||'09:00', end=endTime(start, Number(p.duration||60)); return `<div class="card appt" onclick="openPersonal('${p.id}')"><div class="leftbar" style="background:${personalColor()}"></div><div class="appt-main"><div class="appt-time">${shortDate(p.date)}<br>${fmtTime(start)} – ${end}</div><div class="avatar personal">📅</div><div class="appt-text"><div class="name">Non disponibile</div><div class="desc">${escapeHTML(p.title)}</div><div class="price">Impegno personale</div></div></div><div class="status-col"><div class="status personal">🔒 Impegno</div></div></div>`; }
 
 function calendarHTML(){
-  const y=calMonth.getFullYear(), m=calMonth.getMonth(); const first=new Date(y,m,1), start=(first.getDay()+6)%7; const days=new Date(y,m+1,0).getDate(); let cells='';
+  const y=calMonth.getFullYear(), m=calMonth.getMonth();
+  const first=new Date(y,m,1), start=(first.getDay()+6)%7;
+  const days=new Date(y,m+1,0).getDate();
+  let cells='';
+
   for(let i=0;i<start;i++) cells += `<div class="day off"></div>`;
-  for(let d=1; d<=days; d++){ const date=isoDate(new Date(y,m,d)); const hasW=db.appointments.some(a=>a.date===date), hasP=db.personal.some(p=>p.date===date); cells += `<button class="day ${date===selectedDate?'sel':''} ${date===isoDate(new Date())?'today':''}" onclick="selectDay('${date}')"><div class="daynum">${d}</div><div class="dots">${hasW?'<span class="dot"></span>':''}${hasP?'<span class="dot personal"></span>':''}</div></button>`; }
-  const dayEvents = allDayEvents(selectedDate); const monthE = monthEvents(calMonth);
-  return `<div class="screen"><div class="card calendar-box"><div class="toolbar"><button class="smallbtn" onclick="changeMonth(-1)">‹</button><h2>${new Intl.DateTimeFormat('it-IT',{month:'long',year:'numeric'}).format(calMonth)}</h2><button class="smallbtn" onclick="changeMonth(1)">›</button></div><div class="subnote">Pallino rosa = lavoro · pallino tortora = personale</div><div class="calendar">${['L','M','M','G','V','S','D'].map(x=>`<div class="calhead">${x}</div>`).join('')}${cells}</div></div>
-  <div class="section-head"><h2>Giorno</h2><button class="primary" onclick="openNewMenu('${selectedDate}')">＋</button></div><div class="list">${dayEvents.length ? dayEvents.map(e=>e.t==='w'?apptRow(e.x):personalApptRow(e.x)).join('') : '<div class="empty">Nessun evento in questo giorno.</div>'}</div>
-  <div class="section-head"><h2>Eventi del mese</h2></div><div class="list">${monthE.length ? monthE.map(e=>e.t==='w'?apptRow(e.x):personalApptRow(e.x)).join('') : '<div class="empty">Nessun evento nel mese selezionato.</div>'}</div></div>`;
+
+  for(let d=1; d<=days; d++){
+    const date=isoDate(new Date(y,m,d));
+    const work=db.appointments
+      .filter(a=>a.date===date)
+      .sort((a,b)=>parseDT(a.date,a.time)-parseDT(b.date,b.time));
+    const personal=db.personal
+      .filter(p=>p.date===date)
+      .sort((a,b)=>parseDT(a.date,a.time)-parseDT(b.date,b.time));
+
+    const labels=[
+      ...work.map(a=>{
+        const s=serviceObj(a.serviceId);
+        const c=clientObj(a.clientId);
+        const serviceName=s?.name || 'Appuntamento';
+        const clientName=c?.name || 'Cliente';
+        return {type:'work', label:`${serviceName} · ${clientName}`};
+      }),
+      ...personal.map(p=>({type:'personal', label:p.title || 'Impegno personale'}))
+    ];
+
+    const visible=labels.slice(0,3);
+    const extra=Math.max(0,labels.length-visible.length);
+
+    cells += `<button class="day ${date===selectedDate?'sel':''} ${date===isoDate(new Date())?'today':''}" onclick="selectDay('${date}')">
+      <div class="daynum">${d}</div>
+      <div class="day-events">
+        ${visible.map(e=>`<span class="month-event ${e.type}">${escapeHTML(e.label)}</span>`).join('')}
+        ${extra?`<span class="month-more">+${extra}</span>`:''}
+      </div>
+    </button>`;
+  }
+
+  const dayEvents=allDayEvents(selectedDate);
+  const agenda=dayTimelineHTML(selectedDate, dayEvents);
+
+  return `<div class="screen">
+    <div class="card calendar-box">
+      <div class="toolbar">
+        <button class="smallbtn" onclick="changeMonth(-1)">‹</button>
+        <h2>${new Intl.DateTimeFormat('it-IT',{month:'long',year:'numeric'}).format(calMonth)}</h2>
+        <button class="smallbtn" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="calendar-legend">
+        <span class="legend-item"><span class="legend-swatch work"></span>Appuntamenti</span>
+        <span class="legend-item"><span class="legend-swatch personal"></span>Impegni personali</span>
+      </div>
+      <div class="calendar">
+        ${['L','M','M','G','V','S','D'].map(x=>`<div class="calhead">${x}</div>`).join('')}
+        ${cells}
+      </div>
+    </div>
+
+    <div class="card day-agenda-card">
+      <div class="day-agenda-head">
+        <h2>${new Intl.DateTimeFormat('it-IT',{weekday:'short',day:'numeric',month:'short'}).format(new Date(selectedDate+'T12:00:00'))}</h2>
+        <button class="primary" onclick="openNewMenu('${selectedDate}')">＋</button>
+      </div>
+      ${agenda}
+    </div>
+  </div>`;
 }
+
+function dayTimelineHTML(date, dayEvents){
+  const startHour=8, endHour=22, hourHeight=60;
+  const totalHeight=(endHour-startHour)*hourHeight;
+
+  let grid='';
+  for(let h=startHour; h<=endHour; h++){
+    const top=(h-startHour)*hourHeight;
+    grid += `<div class="time-row" style="top:${top}px"><span class="time-label">${String(h).padStart(2,'0')}:00</span></div>`;
+  }
+
+  const eventBlocks=dayEvents.map(e=>{
+    let start, duration, title, sub, cls, click;
+
+    if(e.t==='w'){
+      const a=e.x, s=serviceObj(a.serviceId), c=clientObj(a.clientId);
+      start=a.time || '09:00';
+      duration=Number(s?.duration || 60);
+      title=s?.name || 'Appuntamento';
+      sub=`${c?.name || 'Cliente'} · ${fmtTime(start)}–${endTime(start,duration)}`;
+      cls='work';
+      click=`openAppointment('${a.id}')`;
+    }else{
+      const p=e.x;
+      start=p.time || '09:00';
+      duration=Number(p.duration || 60);
+      title=p.title || 'Impegno personale';
+      sub=`Impegno personale · ${fmtTime(start)}–${endTime(start,duration)}`;
+      cls='personal';
+      click=`openPersonal('${p.id}')`;
+    }
+
+    const [hh,mm]=start.split(':').map(Number);
+    const startMinutes=(hh-startHour)*60+mm;
+    let top=(startMinutes/60)*hourHeight;
+    let height=Math.max(42,(duration/60)*hourHeight);
+
+    if(top < 0){
+      height += top;
+      top=0;
+    }
+    if(top+height > totalHeight) height=Math.max(36,totalHeight-top);
+
+    return `<button class="timeline-event ${cls}" style="top:${top}px;height:${height}px" onclick="${click}">
+      <div class="timeline-event-title">${escapeHTML(title)}</div>
+      <div class="timeline-event-sub">${escapeHTML(sub)}</div>
+    </button>`;
+  }).join('');
+
+  return `<div class="timeline-wrap">
+    <div class="timeline" style="height:${totalHeight}px">
+      ${grid}
+      ${eventBlocks}
+    </div>
+    ${dayEvents.length?'':'<div class="timeline-empty">Nessun appuntamento o impegno in questo giorno.</div>'}
+  </div>`;
+}
+
 function selectDay(date){ selectedDate=date; calMonth = new Date(date + 'T12:00:00'); calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1); render(); }
 function changeMonth(delta){ calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()+delta, 1); if(!sameMonth(selectedDate, calMonth)) selectedDate = isoDate(new Date(calMonth.getFullYear(), calMonth.getMonth(), 1)); render(); }
 
@@ -439,7 +632,10 @@ function exportBackup(){ const blob=new Blob([JSON.stringify(db,null,2)],{type:'
 function importBackup(){ showSheet(`<h2>Ripristina backup</h2><p>Seleziona un file JSON esportato da VC Beauty.</p><input type="file" id="backupFile" accept=".json,application/json"><div class="actions"><button class="primary" onclick="doImport()">Importa backup</button></div>`); }
 function doImport(){ const f=backupFile.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const d=JSON.parse(r.result); if(!d.clients || !d.services || !d.appointments || !d.personal) throw new Error(); d.clients=d.clients.map(c=>({...c,address:c.address||'',city:c.city||''})); db=d; closeModal(); saveDB(); alert('Backup importato.'); }catch(e){ alert('Backup non valido.'); } }; r.readAsText(f); }
 function resetAll(){ if(!confirm('Vuoi azzerare tutti i dati?')) return; db={clients:[],services:JSON.parse(JSON.stringify(DEFAULT_SERVICES)),appointments:[],personal:[]}; saveDB(); syncAllPushReminders().catch(()=>{}); }
-function showSheet(html){ document.getElementById('sheet').innerHTML=html; document.getElementById('modal').classList.add('show'); }
+function showSheet(html){
+  document.getElementById('sheet').innerHTML = `<button class="sheet-close" type="button" aria-label="Chiudi" onclick="closeModal()">×</button>${html}`;
+  document.getElementById('modal').classList.add('show');
+}
 function closeModal(){ document.getElementById('modal').classList.remove('show'); }
 if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
 window.addEventListener('load',()=>initOneSignalPush());

@@ -62,3 +62,11 @@ Sono stati ripristinati:
 Il logo utilizzato è quello inviato dall'utente per VC Beauty.
 Dopo il deploy GitHub/Netlify, per aggiornare l'icona sulla Home dell'iPhone
 può essere necessario rimuovere VC Beauty dalla Home e aggiungerla di nuovo da Safari.
+
+
+## Aggiornamento v2.9
+- mantenute tutte le modifiche fino alla v2.8, inclusa la rimozione della Home;
+- ripristinati logo e icone dell'app;
+- ripristinati manifest PWA, apple-touch-icon e icone 192/512;
+- mantenute le Netlify Functions per le notifiche push;
+- mantenuto il logo VC Beauty nella schermata iniziale.
