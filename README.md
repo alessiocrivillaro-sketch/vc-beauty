@@ -1,4 +1,14 @@
-# VC Beauty v3.0 — correzione notifiche iPhone
+# VC Beauty v3.1 — aggiornamento promemoria
+
+La v3.1 mantiene la registrazione push della v3.0 e corregge la gestione dei vecchi
+promemoria già conclusi, già cancellati o non più presenti in OneSignal. Prima di
+rimuovere un riferimento salvato, la Function verifica l’esito o lo stato effettivo
+del messaggio. Gli errori di connessione e credenziali restano visibili, con un motivo
+più preciso. Non vengono eliminati appuntamenti, clienti o altri dati dell’app.
+
+Per aggiornare, carica tutti i file su GitHub, **compresa la cartella netlify**:
+la correzione comprende `netlify/functions/push-cancel.js`. Dopo il deploy,
+apri Impostazioni → Notifiche e premi **Risincronizza promemoria**.
 
 Aggiornamento della v2.9 originale con logo ripristinato. Mantiene logo, icone,
 schermata iniziale con Entra, apertura sul Calendario, calendario stile iPhone,
@@ -27,7 +37,7 @@ clienti, servizi, incassi, preferenze, dati locali e Netlify Functions.
    Non caricare soltanto `index.html` e non caricare lo ZIP come singolo file.
 5. Salva le modifiche su GitHub e attendi il deploy completato su Netlify.
 6. Mantieni lo stesso sito/indirizzo Netlify. Chiudi e riapri VC Beauty sull’iPhone.
-   In **Impostazioni → Notifiche**, in fondo, deve comparire **VC Beauty v3.0**.
+   In **Impostazioni → Notifiche**, in fondo, deve comparire **VC Beauty v3.1**.
 
 Il progetto non richiede un comando di build o nuove dipendenze.
 Usa GitHub collegato a Netlify per distribuire anche le Functions.
@@ -51,4 +61,4 @@ Una risposta di invio accettato da OneSignal non garantisce la consegna:
 la prova finale è vedere arrivare la notifica sul dispositivo.
 
 Per configurazione e problemi, leggi **README_NOTIFICHE.md**.
-I controlli eseguiti sono riepilogati in **VERIFICHE_v3_0.md**.
+I controlli eseguiti sono riepilogati in **VERIFICHE_v3_1.md**.

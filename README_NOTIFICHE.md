@@ -1,4 +1,4 @@
-# VC Beauty v3.0 — configurazione notifiche
+# VC Beauty v3.1 — configurazione notifiche
 
 ## Netlify
 
@@ -15,8 +15,10 @@ Apri sul tuo sito `/.netlify/functions/push-config` e verifica `configured: true
 Questo conferma la presenza delle variabili, non verifica che le credenziali siano valide.
 La risposta contiene App ID e l’identità dell’app, mai la chiave API segreta.
 
-Le Functions originali sono mantenute:
-`push-config`, `push-schedule`, `push-cancel` e `_onesignal`.
+Sono incluse `push-config`, `push-schedule`, `push-cancel` e `_onesignal`.
+La v3.1 aggiorna `push-cancel`: un vecchio messaggio confermato come concluso,
+cancellato o inesistente non impedisce più la nuova programmazione.
+Gli altri errori restano bloccanti per evitare di programmare notifiche duplicate.
 L’identità esistente resta `vc-beauty-valeria`; questa versione conserva il modello
 dell’app personale già presente nella v2.9 e non introduce account multipli.
 
@@ -78,3 +80,5 @@ aggiunto un sistema di sincronizzazione dei dati tra dispositivi.
 - [OneSignal su iOS](https://documentation.onesignal.com/docs/en/web-push-for-ios)
 - [Configurazione service worker](https://documentation.onesignal.com/docs/en/onesignal-service-worker)
 - [Requisiti Apple Web Push](https://developer.apple.com/documentation/usernotifications/sending-web-push-notifications-in-web-apps-and-browsers)
+- [Cancellazione messaggi OneSignal](https://documentation.onesignal.com/reference/cancel-message)
+- [Verifica stato messaggio](https://documentation.onesignal.com/reference/view-message)

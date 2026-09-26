@@ -295,7 +295,8 @@ async function cancelPush(id){
   const abort = new AbortController(), timer = setTimeout(()=>abort.abort(),20000);
   try{
     const r=await fetch('/.netlify/functions/push-cancel', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}),signal:abort.signal});
-    if(!r.ok) throw new Error('Non è stato possibile aggiornare i promemoria già programmati. Riprova tra poco.');
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok || data.success!==true) throw new Error(typeof data.error==='string' ? data.error : `Cancellazione non confermata (HTTP ${r.status}). Verifica il deploy della Function push-cancel e riprova.`);
   }finally{ clearTimeout(timer); }
 }
 function loadScheduledPushIds(){ try{return JSON.parse(localStorage.getItem('vc_beauty_scheduled_push_ids')||'[]')}catch{return []} }
@@ -325,7 +326,11 @@ async function syncPushRemindersOnce(){
   const cancelled = await Promise.allSettled(oldIds.map(cancelPush));
   const remaining=oldIds.filter((_,i)=>cancelled[i].status==='rejected');
   saveScheduledPushIds(remaining);
-  if(remaining.length) throw new Error('Alcuni vecchi promemoria non sono stati cancellati. Premi Risincronizza promemoria per riprovare.');
+  if(remaining.length){
+    const failed=cancelled.find(result=>result.status==='rejected');
+    const reason=failed?.reason?.name==='AbortError' ? 'Il server non ha risposto in tempo. Riprova tra poco.' : failed?.reason?.message || 'Riprova tra poco.';
+    throw new Error('Alcuni vecchi promemoria non sono stati cancellati. '+reason);
+  }
   const newIds=[];
   let firstError=null;
   const lead=Number(notificationPrefs.leadMinutes||60);
@@ -614,7 +619,7 @@ function openNotificationSettings(){
       <option value="120" ${notificationPrefs.leadMinutes==120?'selected':''}>2 ore prima</option>
       <option value="1440" ${notificationPrefs.leadMinutes==1440?'selected':''}>1 giorno prima</option>
     </select></label>
-    <div class="actions"><button id="pushEnable" class="primary" onclick="requestPushPermission()">Consenti notifiche</button><button id="pushTest" class="secondary" onclick="sendTestPush()">Notifica di prova</button></div><p style="font-size:12px;color:var(--muted)">VC Beauty v3.0</p>`);
+    <div class="actions"><button id="pushEnable" class="primary" onclick="requestPushPermission()">Consenti notifiche</button><button id="pushTest" class="secondary" onclick="sendTestPush()">Notifica di prova</button></div><p style="font-size:12px;color:var(--muted)">VC Beauty v3.1</p>`);
   updateNotificationSettings();
 }
 function updateNotificationSettings(){
