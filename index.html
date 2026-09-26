@@ -23,6 +23,7 @@
     html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
     body{padding-bottom:calc(94px + env(safe-area-inset-bottom));overscroll-behavior:none} body.intro-open{padding-bottom:0;overflow:hidden;height:100dvh} input,select,textarea,button{touch-action:manipulation}
     button,input,select,textarea{font:inherit}
+    #pushEnable:disabled,#pushTest:disabled{opacity:.6}
     .app{max-width:940px;margin:0 auto}
     .screen{padding:16px 16px 26px}
     .hero{background:linear-gradient(180deg,#f8ecef,#f7eff2);border-bottom:1px solid var(--line);padding:12px 16px 18px}
@@ -229,6 +230,7 @@
   <button data-tab="settings" onclick="go('settings')"><span class="ticon">⚙</span><span>Impostazioni</span></button>
 </nav>
 <div class="modal" id="modal" onclick="if(event.target===this) closeModal()"><div class="sheet" id="sheet"></div></div>
+<script src="push/vc-push.js"></script>
 <script>
 const DEFAULT_SERVICES = [
   {id:"s1",name:"Make-up cerimonia",category:"Make-up",price:35,duration:120},
@@ -247,9 +249,19 @@ let calMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let incomeFilter = "today";
 let showIntro = true;
 let notificationPrefs = loadNotificationPrefs();
-let pushConfigured = false;
-let pushReady = false;
-const PUSH_USER_ID = "vc-beauty-valeria";
+let pushWasActive = false;
+let pushSyncPromise = null;
+let pushSyncAgain = false;
+let pushSyncMessage = '';
+let pushTestBusy = false;
+const pushClient = new VCBeautyPush(() => {
+  updateNotificationSettings();
+  if(!pushClient.active) pushWasActive = false;
+  if(pushClient.active && !pushClient.busy && !pushClient.loading && !pushWasActive){
+    pushWasActive = true;
+    syncAllPushReminders().catch(()=>{});
+  }
+});
 
 function loadNotificationPrefs(){
   const defaults = {work:true, personal:true, unconfirmed:true, unpaid:true, dailySummary:false, leadMinutes:60};
@@ -264,75 +276,67 @@ function setNotifPref(key, value){
   syncAllPushReminders().catch(()=>{});
 }
 
-async function initOneSignalPush(){
-  try{
-    const cfgResp = await fetch('/.netlify/functions/push-config', {cache:'no-store'});
-    if(!cfgResp.ok) return;
-    const cfg = await cfgResp.json();
-    pushConfigured = !!cfg.configured;
-    if(!pushConfigured) return;
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    window.OneSignalDeferred.push(async function(OneSignal){
-      try{
-        await OneSignal.init({
-          appId: cfg.appId,
-          serviceWorkerPath: "push/onesignal/OneSignalSDKWorker.js",
-          serviceWorkerParam: { scope: "/push/onesignal/" },
-          notifyButton: { enable: false }
-        });
-        await OneSignal.login(cfg.externalId || PUSH_USER_ID);
-        pushReady = true;
-        OneSignal.Notifications.addEventListener('permissionChange', function(){
-          syncAllPushReminders().catch(()=>{});
-          if(currentTab==='settings') render();
-        });
-      }catch(e){ console.warn('OneSignal init', e); }
-    });
-  }catch(e){ console.warn('Push config', e); }
-}
-function getPushPermission(){
-  if(!('Notification' in window)) return 'unsupported';
-  return Notification.permission;
-}
-async function requestPushPermission(){
-  if(!pushConfigured){ alert('La parte push non è ancora collegata a OneSignal. Completa la configurazione indicata nel README.'); return; }
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  window.OneSignalDeferred.push(async function(OneSignal){
-    try{
-      await OneSignal.login(PUSH_USER_ID);
-      await OneSignal.Notifications.requestPermission();
-      await syncAllPushReminders();
-      openNotificationSettings();
-    }catch(e){ alert('Non sono riuscito ad attivare le notifiche. Controlla le impostazioni dell’iPhone.'); }
-  });
+function requestPushPermission(){
+  if(pushClient.active) return syncAllPushReminders().catch(()=>{});
+  if(!pushClient.ready && !pushClient.loading){ location.reload(); return; }
+  return pushClient.enable();
 }
 async function sendPushRequest(payload){
-  const r = await fetch('/.netlify/functions/push-schedule', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
-  const data = await r.json().catch(()=>({}));
-  if(!r.ok) throw new Error(data.error || 'Errore push');
-  return data;
+  const abort = new AbortController(), timer = setTimeout(()=>abort.abort(),20000);
+  try{
+    const r = await fetch('/.netlify/functions/push-schedule', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload),signal:abort.signal});
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok || !data.id) throw new Error(typeof data.error==='string' ? data.error : 'OneSignal non ha confermato l’invio. Controlla che la subscription risulti attiva.');
+    return data;
+  }finally{ clearTimeout(timer); }
 }
 async function cancelPush(id){
   if(!id) return;
-  await fetch('/.netlify/functions/push-cancel', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id})}).catch(()=>{});
+  const abort = new AbortController(), timer = setTimeout(()=>abort.abort(),20000);
+  try{
+    const r=await fetch('/.netlify/functions/push-cancel', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}),signal:abort.signal});
+    if(!r.ok) throw new Error('Non è stato possibile aggiornare i promemoria già programmati. Riprova tra poco.');
+  }finally{ clearTimeout(timer); }
 }
 function loadScheduledPushIds(){ try{return JSON.parse(localStorage.getItem('vc_beauty_scheduled_push_ids')||'[]')}catch{return []} }
 function saveScheduledPushIds(ids){ localStorage.setItem('vc_beauty_scheduled_push_ids', JSON.stringify(ids)); }
 function futureIso(date){ return date instanceof Date && !isNaN(date) && date.getTime() > Date.now()+15000 ? date.toISOString() : null; }
 function reminderTimeFor(date,time,minutesBefore){ const d=parseDT(date,time); return new Date(d.getTime()-Number(minutesBefore||60)*60000); }
-async function syncAllPushReminders(){
-  if(!pushConfigured || getPushPermission()!=='granted') return;
+function syncAllPushReminders(){
+  if(!pushClient.active) return Promise.resolve();
+  if(pushSyncPromise){ pushSyncAgain=true; return pushSyncPromise; }
+  pushSyncMessage='Aggiornamento promemoria in corso…';
+  pushSyncPromise=(async()=>{
+    do{
+      pushSyncAgain=false;
+      await syncPushRemindersOnce();
+    }while(pushSyncAgain && pushClient.active);
+    pushSyncMessage='Promemoria aggiornati.';
+  })().catch(error=>{
+    pushSyncMessage='Promemoria non aggiornati: '+error.message;
+    throw error;
+  }).finally(()=>{pushSyncPromise=null; updateNotificationSettings();});
+  updateNotificationSettings();
+  return pushSyncPromise;
+}
+async function syncPushRemindersOnce(){
+  if(!pushClient.active) return;
   const oldIds = loadScheduledPushIds();
-  await Promise.allSettled(oldIds.map(cancelPush));
+  const cancelled = await Promise.allSettled(oldIds.map(cancelPush));
+  const remaining=oldIds.filter((_,i)=>cancelled[i].status==='rejected');
+  saveScheduledPushIds(remaining);
+  if(remaining.length) throw new Error('Alcuni vecchi promemoria non sono stati cancellati. Premi Risincronizza promemoria per riprovare.');
   const newIds=[];
+  let firstError=null;
   const lead=Number(notificationPrefs.leadMinutes||60);
   const siteUrl=location.origin + location.pathname;
   async function schedule(title,message,when,key){
     const iso=futureIso(when); if(!iso) return;
     try{
-      const d=await sendPushRequest({title,message,sendAfter:iso,externalId:PUSH_USER_ID,url:siteUrl,idempotencyKey:key});
-      if(d && d.id) newIds.push(d.id);
-    }catch(e){ console.warn('schedule',e); }
+      if(!pushClient.active) throw new Error('La registrazione push non è più attiva.');
+      const d=await sendPushRequest({title,message,sendAfter:iso,externalId:pushClient.externalId,url:siteUrl,idempotencyKey:key});
+      if(d && d.id){ newIds.push(d.id); saveScheduledPushIds(newIds); }
+    }catch(e){ firstError ||= e; }
   }
   for(const a of db.appointments){
     const s=serviceObj(a.serviceId), c=clientObj(a.clientId), start=parseDT(a.date,a.time);
@@ -356,13 +360,18 @@ async function syncAllPushReminders(){
     }
   }
   saveScheduledPushIds(newIds);
+  if(firstError) throw firstError;
 }
 async function sendTestPush(){
-  if(getPushPermission()!=='granted'){ await requestPushPermission(); return; }
+  if(pushTestBusy) return;
+  if(!pushClient.active){ alert('Completa prima l’attivazione delle notifiche. Attendi la conferma verde della registrazione push.'); return; }
+  pushTestBusy=true;
+  updateNotificationSettings();
   try{
-    await sendPushRequest({title:'VC Beauty',message:'Le notifiche funzionano correttamente 💗',externalId:PUSH_USER_ID,url:location.origin+location.pathname,idempotencyKey:`test-${Date.now()}`});
-    alert('Notifica di prova inviata. Dovrebbe arrivare tra pochi secondi.');
+    await sendPushRequest({title:'VC Beauty',message:'Le notifiche funzionano correttamente 💗',externalId:pushClient.externalId,url:location.origin+location.pathname,idempotencyKey:`test-${Date.now()}`});
+    alert('OneSignal ha accettato la notifica di prova. Torna alla Home dell’iPhone e controlla se arriva.');
   }catch(e){ alert('Non riesco a inviare la notifica di prova: '+e.message); }
+  finally{ pushTestBusy=false; updateNotificationSettings(); }
 }
 
 function loadDB(){
@@ -589,10 +598,8 @@ function serviceStats(){ const counts={}; filteredIncome().forEach(a=>{ const s=
 function settingsHTML(){ return `<div class="screen"><h2 style="font-size:30px;margin-bottom:14px">Impostazioni</h2><div class="card"><div class="setting-row" onclick="openNotificationSettings()"><div><div class="client-name">Notifiche</div><div class="client-sub">Scegli quali promemoria ricevere</div></div><div>›</div></div><div class="setting-row"><div><div class="client-name">Orari di lavoro</div><div class="client-sub">Personalizza i tuoi orari</div></div><div>›</div></div><div class="setting-row"><div><div class="client-name">Giorni di ferie</div><div class="client-sub">Blocca i giorni di non disponibilità</div></div><div>›</div></div><div class="setting-row" onclick="exportBackup()"><div><div class="client-name">Backup dati</div><div class="client-sub">Salva i tuoi dati in sicurezza</div></div><div>›</div></div><div class="setting-row" onclick="importBackup()"><div><div class="client-name">Ripristina backup</div><div class="client-sub">Importa un file JSON</div></div><div>›</div></div><div class="setting-row"><div><div class="client-name">Tema</div><div class="client-sub">Chiaro</div></div><div>›</div></div><div class="setting-row"><div><div class="client-name">Lingua</div><div class="client-sub">Italiano</div></div><div>›</div></div></div><button class="danger" style="width:100%;margin-top:20px;padding:16px" onclick="resetAll()">Azzera dati</button></div>`; }
 
 function openNotificationSettings(){
-  const perm=getPushPermission();
-  const state = !pushConfigured ? '<div class="push-state warn">Configurazione server push da completare.</div>' : perm==='granted' ? '<div class="push-state ok">✓ Notifiche consentite su questo iPhone</div>' : perm==='denied' ? '<div class="push-state warn">Notifiche bloccate. Vai in Impostazioni iPhone → Notifiche → VC Beauty.</div>' : '<div class="push-state">Le notifiche non sono ancora state autorizzate.</div>';
   const sw=(key,title,sub)=>`<div class="notif-row"><div class="notif-copy"><b>${title}</b><span>${sub}</span></div><label class="switch"><input type="checkbox" ${notificationPrefs[key]?'checked':''} onchange="setNotifPref('${key}',this.checked)"><span class="slider"></span></label></div>`;
-  showSheet(`<h2>Notifiche</h2><p>Scegli quali promemoria vuoi ricevere anche quando VC Beauty è chiusa.</p>${state}
+  showSheet(`<h2>Notifiche</h2><p>Scegli quali promemoria vuoi ricevere anche quando VC Beauty è chiusa.</p><div id="pushStatus" class="push-state" role="status" aria-live="polite"></div><p id="pushSyncStatus" role="status" style="font-size:13px"></p>
     <div class="card notif-box">
       ${sw('work','Appuntamenti di lavoro','Promemoria per make-up e unghie')}
       ${sw('personal','Impegni personali','Promemoria per gli impegni personali')}
@@ -607,7 +614,20 @@ function openNotificationSettings(){
       <option value="120" ${notificationPrefs.leadMinutes==120?'selected':''}>2 ore prima</option>
       <option value="1440" ${notificationPrefs.leadMinutes==1440?'selected':''}>1 giorno prima</option>
     </select></label>
-    <div class="actions"><button class="primary" onclick="requestPushPermission()">${perm==='granted'?'Risincronizza promemoria':'Consenti notifiche'}</button><button class="secondary" onclick="sendTestPush()">Notifica di prova</button></div>`);
+    <div class="actions"><button id="pushEnable" class="primary" onclick="requestPushPermission()">Consenti notifiche</button><button id="pushTest" class="secondary" onclick="sendTestPush()">Notifica di prova</button></div><p style="font-size:12px;color:var(--muted)">VC Beauty v3.0</p>`);
+  updateNotificationSettings();
+}
+function updateNotificationSettings(){
+  const status=document.getElementById('pushStatus');
+  if(!status) return;
+  const state=pushClient.status;
+  status.className='push-state '+state.kind;
+  status.textContent=state.message;
+  document.getElementById('pushSyncStatus').textContent=pushClient.active ? pushSyncMessage : '';
+  const button=document.getElementById('pushEnable');
+  button.disabled=!!(pushClient.platformIssue || pushClient.loading || pushClient.busy || pushSyncPromise || pushClient.permission==='denied');
+  button.textContent=pushClient.loading ? 'Preparazione…' : pushClient.busy ? 'Attivazione…' : pushSyncPromise ? 'Sincronizzazione…' : !pushClient.ready ? 'Ricarica e riprova' : pushClient.active ? 'Risincronizza promemoria' : pushClient.permission==='granted' ? 'Completa attivazione' : 'Consenti notifiche';
+  document.getElementById('pushTest').disabled=!pushClient.active || pushClient.busy || pushTestBusy;
 }
 
 
@@ -637,8 +657,8 @@ function showSheet(html){
   document.getElementById('modal').classList.add('show');
 }
 function closeModal(){ document.getElementById('modal').classList.remove('show'); }
-if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
-window.addEventListener('load',()=>initOneSignalPush());
+// OneSignal keeps its original isolated worker; v2.9's separate sw.js did not exist.
+pushClient.init();
 render();
 </script>
 </body>
